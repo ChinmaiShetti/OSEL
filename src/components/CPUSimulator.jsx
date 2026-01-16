@@ -210,7 +210,7 @@ const CPUSimulator = () => {
                 </motion.div>
                 <div>
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-                    CPU Scheduling Simulator
+                    OS Visualization Dashboard
                   </h1>
                   <p className="text-neutral-400 text-xs sm:text-sm mt-1">
                     Learn OS internals through interactive visualization
