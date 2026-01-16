@@ -8,6 +8,7 @@ import {
   RotateCcw,
   ListOrdered,
   Zap,
+  Info,
 } from 'lucide-react';
 import { PagingEngine, PagingAlgorithms } from './PagingEngine';
 
@@ -124,6 +125,7 @@ const PagingSimulator = ({ className = '' }) => {
 
   const [engine, setEngine] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
+  const [activeFrameInfo, setActiveFrameInfo] = useState(null);
   const [playing, setPlaying] = useState(false);
 
   const timerRef = useRef(null);
@@ -219,6 +221,10 @@ const PagingSimulator = ({ className = '' }) => {
     };
   }, [playing, engine, speed]);
 
+  useEffect(() => {
+    setActiveFrameInfo(null);
+  }, [snapshot?.currentIndex]);
+
   const addProcess = () => {
     setProcesses(prev => [...prev, {
       pid: `P${prev.length + 1}`,
@@ -265,6 +271,35 @@ const PagingSimulator = ({ className = '' }) => {
       return acc;
     }, {});
   const logs = snapshot?.logs ?? [];
+
+  const getFrameExplanation = (frame) => {
+    if (frame.isFree) {
+      return 'This frame is currently unused.';
+    }
+    const matchingLoad = logs.find(log => log.message.includes(`Frame ${frame.frameId}`) && log.message.toLowerCase().includes('loaded'));
+    if (matchingLoad) {
+      return matchingLoad.message;
+    }
+    const eviction = logs.find(log => log.message.includes(`Frame ${frame.frameId}`));
+    if (eviction) {
+      return eviction.message;
+    }
+    return `Page ${frame.pageId} of ${frame.processId} occupies Frame ${frame.frameId}.`;
+  };
+
+  const getAlgorithmInsight = (frame) => {
+    if (frame.isFree) return '';
+    const descriptions = {
+      [PagingAlgorithms.FIFO]: `FIFO fills frames in arrival order, so this frame holds the oldest loaded page. The next allocation will wrap to Frame ${(frame.frameId + 1) % frameCount}.`,
+      [PagingAlgorithms.LRU]: `LRU just accessed this page, so it is safe from eviction until other frames show older timestamps. Keep an eye on the frame with the lowest timestamp when the next fault occurs.`,
+      [PagingAlgorithms.OPTIMAL]: `Optimal kept this page because its next use is farther away than every other resident page, so it remains until an even more distant future reference is discovered.`,
+    };
+    return descriptions[algorithm] ?? '';
+  };
+
+  const toggleFrameInfo = (frameId) => {
+    setActiveFrameInfo(prev => (prev === frameId ? null : frameId));
+  };
 
   const nextReferences = referenceQueue.slice(referencesProcessed, referencesProcessed + 5);
   const frameUsagePercent = frameCount ? Math.min(100, Math.round((metrics.framesUsed / frameCount) * 100)) : 0;
@@ -444,13 +479,37 @@ const PagingSimulator = ({ className = '' }) => {
           {displayFrames.map(frame => (
             <div
               key={frame.frameId}
-              className={`rounded-2xl border border-white/10 p-3 text-sm text-white ${frame.isFree ? 'bg-slate-900/40' : 'bg-gradient-to-br from-indigo-500 to-cyan-500'}`}
+              className={`relative rounded-2xl border border-white/10 p-3 text-sm text-white ${frame.isFree ? 'bg-slate-900/40' : 'bg-gradient-to-br from-indigo-500 to-cyan-500'}`}
             >
-              <div className="text-xs uppercase tracking-[0.4em] text-white/60">Frame {frame.frameId}</div>
-              <div className="font-semibold text-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase tracking-[0.4em] text-white/60">Frame {frame.frameId}</span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleFrameInfo(frame.frameId);
+                  }}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                  aria-label={`Explain frame ${frame.frameId}`}
+                >
+                  <Info className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div className="font-semibold text-lg mt-2">
                 {frame.isFree ? 'Free' : `${frame.processId}: Pg ${frame.pageId}`}
               </div>
               {!frame.isFree && <div className="text-[11px] text-white/70">Occupied</div>}
+              {activeFrameInfo === frame.frameId && !frame.isFree && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="absolute left-1/2 top-full z-20 -translate-x-1/2 w-72 rounded-2xl border border-white/20 bg-slate-900/90 px-3 py-3 text-xs text-neutral-200 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.8)]"
+                >
+                  <p className="font-semibold text-white text-sm">{getFrameExplanation(frame)}</p>
+                  <p className="text-[11px] text-cyan-200 mt-2">{getAlgorithmInsight(frame)}</p>
+                </motion.div>
+              )}
             </div>
           ))}
         </div>
