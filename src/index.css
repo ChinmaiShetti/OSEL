@@ -2,53 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 10, 14, 39;
+  --background-end-rgb: 0, 0, 0;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-white;
+    background: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Custom scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgb(30 41 59 / 0.5);
-  border-radius: 4px;
+  background: #0a0e27;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgb(71 85 105);
-  border-radius: 4px;
+  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+  border-radius: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgb(100 116 139);
+  background: linear-gradient(to bottom, #60a5fa, #a78bfa);
 }
 
 /* Firefox scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgb(71 85 105) rgb(30 41 59 / 0.5);
-}
-
-/* Global styles */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.08), transparent 25%),
-              radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.08), transparent 22%),
-              radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.08), transparent 28%),
-              #070b16;
-  @apply text-white antialiased;
+  scrollbar-color: linear-gradient(to bottom, #3b82f6, #8b5cf6) #0a0e27;
 }
 
 /* Focus styles */
 *:focus-visible {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900;
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-950;
 }
 
 /* Selection */
 ::selection {
-  @apply bg-fuchsia-400/40;
+  @apply bg-blue-500/40;
 }
 
 /* Input number spinner hide */
@@ -64,24 +66,36 @@ input[type="number"] {
 
 /* Range input styling */
 input[type="range"] {
-  @apply w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer;
+  @apply w-full h-2 bg-slate-700/50 rounded-lg appearance-none cursor-pointer;
 }
 
 input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-400 transition-colors;
+  @apply appearance-none w-4 h-4 rounded-full cursor-pointer transition-colors;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  @apply shadow-lg;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
 }
 
 input[type="range"]::-moz-range-thumb {
-  @apply w-4 h-4 bg-blue-500 rounded-full cursor-pointer border-0 hover:bg-blue-400 transition-colors;
+  @apply h-4 rounded-full cursor-pointer border-0 transition-colors;
+  width: 16px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
 }
 
 /* Animation utilities */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
   }
   50% {
-    box-shadow: 0 0 20px 5px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.5);
   }
 }
 
@@ -92,7 +106,7 @@ input[type="range"]::-moz-range-thumb {
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -101,20 +115,36 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.4s ease-out;
 }
 
 /* Gradient text utility */
 .gradient-text {
-  @apply bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400;
 }
 
 /* Glass morphism utility */
 .glass {
-  @apply bg-slate-800/50 backdrop-blur-xl border border-slate-700;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  @apply border border-white/10;
 }
 
 /* Card hover effect */
 .card-hover {
-  @apply transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30;
+  @apply transition-all duration-300 hover:border-blue-500/30 hover:bg-slate-900/30;
+}
+
+/* Spacing utilities for less clutter */
+.space-relaxed {
+  gap: 2rem;
+}
+
+.p-relaxed {
+  padding: 2rem;
+}
+
+.py-relaxed {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }

@@ -22,7 +22,7 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
           animate={{ opacity: 1, y: 0, height: 'auto' }}
           exit={{ opacity: 0, y: -20, height: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="bg-gradient-to-r from-blue-900/40 to-emerald-900/40 border border-blue-500/50 rounded-xl overflow-hidden"
+          className="glass-effect rounded-xl overflow-hidden"
         >
           <div className="p-6">
             {/* Header */}

@@ -20,14 +20,17 @@ const GanttChart = ({ gantt, currentTime }) => {
 
   if (!gantt || gantt.length === 0) {
     return (
-      <div className="glass rounded-xl p-6 bg-gradient-to-br from-[#0d1224]/80 via-[#0f172a]/70 to-[#131a32]/70 border border-slate-700/70">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-            <BarChart3 className="w-4 h-4 text-white" />
+      <div className="glass rounded-2xl p-8 border border-white/10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-white" />
           </div>
-          <h3 className="font-semibold text-white">Gantt Chart Timeline</h3>
+          <div>
+            <h3 className="font-semibold text-white">Gantt Chart Timeline</h3>
+            <p className="text-xs text-neutral-400">Visualizes CPU allocation over time</p>
+          </div>
         </div>
-        <div className="text-center py-8 text-slate-400">
+        <div className="text-center py-12 text-neutral-400">
           <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No execution data yet</p>
           <p className="text-sm">Run the simulation to see the timeline</p>
@@ -41,26 +44,26 @@ const GanttChart = ({ gantt, currentTime }) => {
   const timeMarkers = Array.from({ length: totalTime + 1 }, (_, i) => i);
 
   return (
-    <div className="glass rounded-xl overflow-hidden bg-gradient-to-br from-[#0d1224]/80 via-[#0f172a]/70 to-[#131a32]/70 border border-slate-700/70">
+    <div className="glass rounded-2xl overflow-hidden border border-white/10">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+      <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-            <BarChart3 className="w-4 h-4 text-white" />
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="font-semibold text-white">Gantt Chart Timeline</h3>
-            <p className="text-xs text-slate-400">Visualizes CPU allocation over time</p>
+            <p className="text-xs text-neutral-400">Visualizes CPU allocation over time</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-neutral-400">
           <Clock className="w-4 h-4" />
           <span>Total: {totalTime} units</span>
         </div>
       </div>
 
       {/* Chart Area */}
-      <div className="p-4">
+      <div className="p-6">
         <div 
           ref={scrollRef}
           className="overflow-x-auto pb-2 custom-scrollbar"
@@ -79,13 +82,13 @@ const GanttChart = ({ gantt, currentTime }) => {
             </div>
 
             {/* Gantt Bars */}
-            <div className="relative h-16 bg-slate-900 rounded-lg border border-slate-600 overflow-hidden">
+            <div className="relative h-16 bg-neutral-900 rounded-lg border border-neutral-800 overflow-hidden">
               {/* Grid Lines */}
               <div className="absolute inset-0 flex">
                 {timeMarkers.map(t => (
                   <div
                     key={t}
-                    className="w-12 flex-shrink-0 border-r border-slate-700/50"
+                    className="w-12 flex-shrink-0 border-r border-neutral-800/50"
                   />
                 ))}
               </div>
@@ -121,7 +124,7 @@ const GanttChart = ({ gantt, currentTime }) => {
                       
                       {/* Tooltip */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        <div className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
+                        <div className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs whitespace-nowrap shadow-xl">
                           <div className="text-white font-semibold">{segment.pid}</div>
                           <div className="text-slate-400">
                             Time: {segment.start} → {segment.end}
@@ -176,7 +179,7 @@ const GanttChart = ({ gantt, currentTime }) => {
       </div>
 
       {/* Summary */}
-      <div className="px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
+      <div className="px-4 py-3 bg-neutral-900/30 border-t border-neutral-800/50">
         <div className="flex flex-wrap gap-4 text-xs text-slate-400">
           <span>
             <strong className="text-slate-300">{gantt.length}</strong> context switches

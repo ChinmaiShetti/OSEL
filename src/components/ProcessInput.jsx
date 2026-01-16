@@ -10,16 +10,16 @@ import { getPidColor } from './SchedulerEngine';
  */
 const ProcessInput = ({ processes, onUpdate, onAdd, onRemove, disabled }) => {
   return (
-    <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl overflow-hidden">
+    <div className="glass rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+      <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-            <User className="w-4 h-4 text-white" />
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+            <User className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="font-semibold text-white">Process Configuration</h3>
-            <p className="text-xs text-slate-400">Define processes to schedule</p>
+            <p className="text-xs text-neutral-400">Define processes to schedule</p>
           </div>
         </div>
         <motion.button
@@ -27,7 +27,7 @@ const ProcessInput = ({ processes, onUpdate, onAdd, onRemove, disabled }) => {
           whileTap={{ scale: 0.95 }}
           onClick={onAdd}
           disabled={disabled}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
         >
           <Plus size={14} />
           Add Process
@@ -35,7 +35,7 @@ const ProcessInput = ({ processes, onUpdate, onAdd, onRemove, disabled }) => {
       </div>
 
       {/* Process List */}
-      <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+      <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
         <AnimatePresence mode="popLayout">
           {processes.map((process, idx) => (
             <motion.div
@@ -45,17 +45,17 @@ const ProcessInput = ({ processes, onUpdate, onAdd, onRemove, disabled }) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, x: -100 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="bg-slate-900/80 rounded-lg border border-slate-600/50 overflow-hidden"
+              className="bg-slate-900/40 rounded-lg border border-white/10 overflow-hidden hover:border-white/20 transition-colors"
               style={{ borderLeftColor: getPidColor(process.pid), borderLeftWidth: '4px' }}
             >
               {/* Process Header */}
-              <div className="px-4 py-3 bg-slate-800/50 flex items-center justify-between">
+              <div className="px-5 py-4 bg-slate-800/30 flex items-center justify-between">
                 <input
                   type="text"
                   value={process.pid}
                   onChange={(e) => onUpdate(idx, 'pid', e.target.value)}
                   disabled={disabled}
-                  className="bg-transparent border-none text-lg font-bold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 w-20 disabled:opacity-50"
+                  className="bg-transparent border-none text-lg font-bold text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 w-24 disabled:opacity-50"
                   placeholder="PID"
                 />
                 <motion.button
@@ -70,10 +70,10 @@ const ProcessInput = ({ processes, onUpdate, onAdd, onRemove, disabled }) => {
               </div>
 
               {/* Process Fields */}
-              <div className="p-4 grid grid-cols-3 gap-3">
+              <div className="p-5 grid grid-cols-3 gap-4">
                 {/* Arrival Time */}
                 <div className="space-y-1.5">
-                  <label className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <label className="flex items-center gap-1.5 text-xs text-neutral-400">
                     <Clock size={12} />
                     Arrival
                   </label>

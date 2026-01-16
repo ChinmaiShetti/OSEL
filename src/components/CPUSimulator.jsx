@@ -13,6 +13,7 @@ import ProcessInput from './ProcessInput';
 import MetricsExplainer from './MetricsExplainer';
 import TraceViewer from './TraceViewer';
 import GanttChart from './GanttChart';
+import MemorySimulator from './memory/MemorySimulator';
 
 // Import engine
 import { 
@@ -46,6 +47,7 @@ const CPUSimulator = () => {
   const [playing, setPlaying] = useState(false);
   const [showConcept, setShowConcept] = useState(true);
   const [showMetricsHelp, setShowMetricsHelp] = useState(false);
+  const [activePage, setActivePage] = useState('scheduling');
   
   const timerRef = useRef(null);
 
@@ -184,294 +186,293 @@ const CPUSimulator = () => {
   const isRunning = engine !== null;
   const isDone = snapshot?.done || false;
 
+  const pageOptions = [
+    { id: 'scheduling', label: 'Scheduling' },
+    { id: 'storage', label: 'Storage Allocation' },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#070b16] via-[#0b1024] to-[#0c132e] text-white">
       {/* ===== HEADER ===== */}
-      <header className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <motion.div 
-              initial={{ rotate: -180, scale: 0 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20"
-            >
-              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </motion.div>
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-                CPU Scheduling Simulator
-              </h1>
-              <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-                Learn OS internals through interactive visualization
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* ===== MAIN CONTENT ===== */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        
-        {/* Algorithm Concept Card */}
-        <ConceptCard 
-          algorithm={algorithm}
-          isVisible={showConcept}
-          onToggle={() => setShowConcept(!showConcept)}
-        />
-
-        {/* Algorithm Selection */}
-        <div className="glass rounded-xl p-4 sm:p-5 border border-slate-700/70 bg-gradient-to-br from-slate-900/70 via-slate-900/40 to-indigo-950/50">
-          <h3 className="font-semibold mb-3 sm:mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" />
-            Choose an Algorithm to Study
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
-            {Object.values(Algorithm).map(algo => (
-              <motion.button
-                key={algo}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleAlgoChange(algo)}
-                disabled={isRunning}
-                className={`p-3 sm:p-4 rounded-xl font-medium text-sm transition-all relative overflow-hidden ${
-                  algorithm === algo
-                    ? 'bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 text-white shadow-lg shadow-fuchsia-500/25'
-                    : 'bg-slate-800/60 hover:bg-slate-700/70 text-slate-200 disabled:opacity-50 border border-slate-700/60'
-                }`}
-              >
-                {algorithm === algo && (
-                  <motion.div
-                    layoutId="algorithmHighlight"
-                    className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 -z-10"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
-                )}
-                <div className="font-bold">{algo}</div>
-                <div className="text-xs opacity-75 mt-1 hidden sm:block">
-                  {algorithmDescriptions[algo]}
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Grid Layout */}
-        <div className="grid lg:grid-cols-12 gap-6">
-          
-          {/* ===== LEFT SIDEBAR ===== */}
-          <div className="lg:col-span-4 space-y-4">
-            
-            {/* Settings Panel */}
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-700 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Settings className="w-4 h-4 text-white" />
-                </div>
-                <h3 className="font-semibold text-white">Simulation Settings</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                {/* Quantum Setting */}
+        <header className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <motion.div 
+                  initial={{ rotate: -180, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20"
+                >
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </motion.div>
                 <div>
-                  <label className="flex items-center gap-2 text-sm text-slate-300 mb-2">
-                    <Timer className="w-4 h-4 text-amber-400" />
-                    Time Quantum (for Round Robin)
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={quantum}
-                    onChange={(e) => { setQuantum(Number(e.target.value) || 1); reset(); }}
-                    disabled={isRunning}
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 transition-all"
-                  />
-                  <p className="text-xs text-slate-500 mt-1.5">
-                    Each process gets this many time units per turn in RR
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+                    CPU Scheduling Simulator
+                  </h1>
+                  <p className="text-neutral-400 text-xs sm:text-sm mt-1">
+                    Learn OS internals through interactive visualization
                   </p>
                 </div>
+              </div>
+              <nav className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em] text-neutral-300">
+                {pageOptions.map(page => (
+                  <button
+                    key={page.id}
+                    type="button"
+                    onClick={() => setActivePage(page.id)}
+                    className={`px-3 py-2 rounded-full transition-all text-white ${
+                      activePage === page.id
+                        ? 'bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 shadow-[0_10px_40px_-10px_rgba(123,66,255,0.7)]'
+                        : 'bg-white/10 hover:bg-white/20 text-white/70'
+                    }`}
+                  >
+                    {page.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </header>
 
-                {/* Speed Setting */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm text-slate-300 mb-2">
-                    <Gauge className="w-4 h-4 text-cyan-400" />
-                    Playback Speed: {speed}ms
-                  </label>
-                  <input
-                    type="range"
-                    min="100"
-                    max="2000"
-                    step="100"
-                    value={speed}
-                    onChange={(e) => setSpeed(Number(e.target.value))}
-                    className="w-full accent-blue-500"
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <AnimatePresence mode="wait">
+          {activePage === 'scheduling' && (
+            <motion.div
+              key="scheduling"
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-10"
+            >
+              <ConceptCard 
+                algorithm={algorithm}
+                isVisible={showConcept}
+                onToggle={() => setShowConcept(!showConcept)}
+              />
+
+              <div className="glass rounded-2xl border border-white/10 p-relaxed space-y-5">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  Choose an Algorithm to Study
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {Object.values(Algorithm).map(algo => (
+                    <motion.button
+                      key={algo}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleAlgoChange(algo)}
+                      disabled={isRunning}
+                      className={`p-3 sm:p-4 rounded-2xl font-medium text-sm transition-all relative overflow-hidden ${
+                        algorithm === algo
+                          ? 'bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 text-white shadow-[0_20px_40px_-20px_rgba(123,66,255,0.9)]'
+                          : 'bg-slate-900/70 hover:bg-slate-800/70 text-slate-200 disabled:opacity-50 border border-white/10'
+                      }`}
+                    >
+                      {algorithm === algo && (
+                        <motion.div
+                          layoutId="algorithmHighlight"
+                          className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 -z-10"
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      <div className="font-bold">{algo}</div>
+                      <div className="text-[11px] opacity-75 mt-1 hidden sm:block">
+                        {algorithmDescriptions[algo]}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="glass rounded-2xl overflow-hidden border border-white/10">
+                    <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <Settings className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white">Simulation Settings</h3>
+                        <p className="text-xs text-neutral-400">Control quantum + speed</p>
+                      </div>
+                    </div>
+                    <div className="p-relaxed space-y-6">
+                      <div>
+                        <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-neutral-400 mb-2">
+                          <Timer className="w-4 h-4 text-amber-400" />
+                          Time Quantum
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={quantum}
+                          onChange={(e) => { setQuantum(Number(e.target.value) || 1); reset(); }}
+                          disabled={isRunning}
+                          className="w-full bg-transparent border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="text-xs text-neutral-400 mt-2">Used only by Round Robin</p>
+                      </div>
+
+                      <div>
+                        <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-neutral-400 mb-2">
+                          <Gauge className="w-4 h-4 text-cyan-400" />
+                          Playback Speed
+                        </label>
+                        <input
+                          type="range"
+                          min="100"
+                          max="2000"
+                          step="100"
+                          value={speed}
+                          onChange={(e) => setSpeed(Number(e.target.value))}
+                          className="w-full accent-cyan-400"
+                        />
+                        <div className="flex justify-between text-[11px] uppercase tracking-[0.4em] text-neutral-500 mt-2">
+                          <span>Fast</span>
+                          <span>Slow</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glass rounded-2xl overflow-hidden border border-white/10">
+                    <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <Cpu className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white">Execution Controls</h3>
+                        <p className="text-xs text-neutral-400">Step through execution</p>
+                      </div>
+                    </div>
+                    <div className="p-relaxed space-y-5">
+                      <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={step}
+                        disabled={isDone}
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-3"
+                      >
+                        <SkipForward className="w-4 h-4" />
+                        Step
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={playing ? pause : play}
+                        disabled={isDone}
+                        className={`w-full flex items-center justify-center gap-2 rounded-2xl font-semibold px-4 py-3 ${playing ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+                      >
+                        {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        {playing ? 'Pause' : 'Auto Play'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={runToEnd}
+                        disabled={isDone}
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-3"
+                      >
+                        <FastForward className="w-4 h-4" />
+                        Run to End
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={reset}
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-3"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        Reset
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  <ProcessInput
+                    processes={processes}
+                    onUpdate={updateProcess}
+                    onAdd={addProcess}
+                    onRemove={removeProcess}
+                    disabled={isRunning}
                   />
-                  <div className="flex justify-between text-xs text-slate-500 mt-1">
-                    <span>Fast (100ms)</span>
-                    <span>Slow (2000ms)</span>
+                </div>
+
+                <div className="lg:col-span-8 space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <StatusCard icon={Clock} label="Simulated Time" value={snapshot?.time ?? 0} color="blue" />
+                    <StatusCard icon={Cpu} label="Running" value={snapshot?.running?.pid ?? '—'} valueColor={snapshot?.running ? getPidColor(snapshot.running.pid) : undefined} color="emerald" />
+                    <StatusCard icon={ListOrdered} label="Ready Queue" value={snapshot?.ready?.length ?? 0} color="amber" />
+                    <StatusCard icon={CheckCircle2} label="Completed" value={`${snapshot?.processes?.filter(p => p.state === ProcessState.TERMINATED).length ?? 0}/${processes.length}`} color="purple" />
+                  </div>
+
+                  {snapshot && (
+                    <RunningProcessDetail running={snapshot.running} processes={snapshot.processes} />
+                  )}
+
+                  {snapshot && (
+                    <ReadyQueue ready={snapshot.ready} algorithm={algorithm} />
+                  )}
+
+                  {snapshot && (
+                    <ProcessStates processes={snapshot.processes} />
+                  )}
+
+                  {snapshot && (
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      <GanttChart gantt={snapshot.gantt || []} currentTime={snapshot.time} />
+                      <TraceViewer trace={snapshot.trace} />
+                    </div>
+                  )}
+
+                  {results && (
+                    <div className="space-y-4">
+                      <MetricsExplainer isVisible={showMetricsHelp} onToggle={() => setShowMetricsHelp(!showMetricsHelp)} />
+                      <ResultsTable results={results} />
+                      <LearningInsights results={results} algorithm={algorithm} quantum={quantum} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activePage === 'storage' && (
+            <motion.div
+              key="storage"
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8"
+            >
+              <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(15,118,110,0.8)]">
+                <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-pink-500/30 blur-[120px]" />
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs uppercase tracking-[0.4em] text-amber-300">Storage Lab</p>
+                  <h2 className="text-3xl font-semibold text-white">
+                    Contiguous Allocation Studio
+                  </h2>
+                  <p className="text-sm text-neutral-400">
+                    Explore how first fit, best fit, and worst fit carve up memory inside a bold, neon-inspired laboratory.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.4em] text-white">Live</div>
+                    <div className="flex items-center gap-1 text-sm text-neutral-300">
+                      <Zap className="w-4 h-4 text-cyan-300" />
+                      Real-time hole tracking
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Control Panel */}
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-700 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                  <Cpu className="w-4 h-4 text-white" />
-                </div>
-                <h3 className="font-semibold text-white">Execution Controls</h3>
-              </div>
-              <div className="p-4 space-y-3">
-                {/* Step Button */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={step}
-                  disabled={isDone}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3 rounded-xl font-semibold transition-colors"
-                >
-                  <SkipForward className="w-4 h-4" />
-                  Step (One Time Unit)
-                </motion.button>
-                <p className="text-xs text-slate-500 px-1">
-                  Execute one time unit and observe changes
-                </p>
-
-                {/* Play/Pause Button */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={playing ? pause : play}
-                  disabled={isDone}
-                  className={`w-full flex items-center justify-center gap-2 ${
-                    playing 
-                      ? 'bg-amber-600 hover:bg-amber-500' 
-                      : 'bg-emerald-600 hover:bg-emerald-500'
-                  } disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3 rounded-xl font-semibold transition-colors`}
-                >
-                  {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  {playing ? 'Pause' : 'Auto Play'}
-                </motion.button>
-                <p className="text-xs text-slate-500 px-1">
-                  {playing ? 'Stop automatic execution' : 'Run automatically at set speed'}
-                </p>
-
-                {/* Run to End Button */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={runToEnd}
-                  disabled={isDone}
-                  className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3 rounded-xl font-semibold transition-colors"
-                >
-                  <FastForward className="w-4 h-4" />
-                  Run to End
-                </motion.button>
-                <p className="text-xs text-slate-500 px-1">
-                  Skip to final results instantly
-                </p>
-
-                {/* Reset Button */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={reset}
-                  className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-semibold transition-colors mt-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reset Simulation
-                </motion.button>
-              </div>
-            </div>
-
-            {/* Process Input */}
-            <ProcessInput
-              processes={processes}
-              onUpdate={updateProcess}
-              onAdd={addProcess}
-              onRemove={removeProcess}
-              disabled={isRunning}
-            />
-          </div>
-
-          {/* ===== RIGHT MAIN AREA ===== */}
-          <div className="lg:col-span-8 space-y-4">
-            
-            {/* Status Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <StatusCard
-                icon={Clock}
-                label="Simulated Time"
-                value={snapshot?.time ?? 0}
-                color="blue"
-              />
-              <StatusCard
-                icon={Cpu}
-                label="Running"
-                value={snapshot?.running?.pid ?? '—'}
-                valueColor={snapshot?.running ? getPidColor(snapshot.running.pid) : undefined}
-                color="emerald"
-              />
-              <StatusCard
-                icon={ListOrdered}
-                label="Ready Queue"
-                value={snapshot?.ready?.length ?? 0}
-                color="amber"
-              />
-              <StatusCard
-                icon={CheckCircle2}
-                label="Completed"
-                value={`${snapshot?.processes?.filter(p => p.state === ProcessState.TERMINATED).length ?? 0}/${processes.length}`}
-                color="purple"
-              />
-            </div>
-
-            {/* Running Process Detail */}
-            {snapshot && (
-              <RunningProcessDetail 
-                running={snapshot.running}
-                processes={snapshot.processes}
-              />
-            )}
-
-            {/* Ready Queue */}
-            {snapshot && (
-              <ReadyQueue 
-                ready={snapshot.ready}
-                algorithm={algorithm}
-              />
-            )}
-
-            {/* All Process States */}
-            {snapshot && (
-              <ProcessStates processes={snapshot.processes} />
-            )}
-
-            {/* Live Timeline & Trace side-by-side */}
-            {snapshot && (
-              <div className="grid lg:grid-cols-2 gap-4">
-                <GanttChart 
-                  gantt={snapshot.gantt || []}
-                  currentTime={snapshot.time}
-                />
-                <TraceViewer trace={snapshot.trace} />
-              </div>
-            )}
-
-            {/* Results */}
-            {results && (
-              <>
-                <MetricsExplainer 
-                  isVisible={showMetricsHelp}
-                  onToggle={() => setShowMetricsHelp(!showMetricsHelp)}
-                />
-                <ResultsTable results={results} />
-                <LearningInsights results={results} algorithm={algorithm} quantum={quantum} />
-              </>
-            )}
-          </div>
-        </div>
+              <MemorySimulator className="pt-2" />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* ===== FOOTER ===== */}

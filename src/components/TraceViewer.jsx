@@ -48,14 +48,17 @@ const TraceViewer = ({ trace, maxEvents = 30 }) => {
 
   if (trace.length === 0) {
     return (
-      <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center">
-            <History className="w-4 h-4 text-white" />
+      <div className="glass rounded-2xl p-8 border border-white/10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+            <History className="w-5 h-5 text-white" />
           </div>
-          <h3 className="font-semibold text-white">Execution Trace</h3>
+          <div>
+            <h3 className="font-semibold text-white">Execution Trace</h3>
+            <p className="text-xs text-neutral-400">Click events to see explanations</p>
+          </div>
         </div>
-        <div className="text-center py-8 text-slate-400">
+        <div className="text-center py-12 text-neutral-400">
           <History className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No events yet</p>
           <p className="text-sm">Click "Step" or "Play" to start the simulation</p>
@@ -65,16 +68,16 @@ const TraceViewer = ({ trace, maxEvents = 30 }) => {
   }
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl overflow-hidden">
+    <div className="glass rounded-2xl overflow-hidden border border-white/10">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between flex-wrap gap-3">
+      <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-            <History className="w-4 h-4 text-white" />
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+            <History className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="font-semibold text-white">Execution Trace</h3>
-            <p className="text-xs text-slate-400">Click events to see explanations</p>
+            <p className="text-xs text-neutral-400">Click events to see explanations</p>
           </div>
         </div>
         
