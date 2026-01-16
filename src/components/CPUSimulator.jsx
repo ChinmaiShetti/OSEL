@@ -15,6 +15,7 @@ import TraceViewer from './TraceViewer';
 import GanttChart from './GanttChart';
 import MemorySimulator from './memory/MemorySimulator';
 import PagingSimulator from './memory/PagingSimulator';
+import SystemMetricsPanel from './SystemMetricsPanel';
 
 // Import engine
 import { 
@@ -191,6 +192,7 @@ const CPUSimulator = () => {
     { id: 'scheduling', label: 'Scheduling' },
     { id: 'storage', label: 'Storage Allocation' },
     { id: 'paging', label: 'Paging Explorer' },
+    { id: 'metrics', label: 'Dynamic CPU Metrics' },
   ];
 
   return (
@@ -504,6 +506,31 @@ const CPUSimulator = () => {
                 </div>
               </div>
               <PagingSimulator className="pt-2" />
+            </motion.div>
+          )}
+
+          {activePage === 'metrics' && (
+            <motion.div
+              key="metrics"
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8"
+            >
+              <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(56,189,248,0.5)]">
+                <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-cyan-500/20 blur-[120px]" />
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">Live Metrics</p>
+                  <h2 className="text-3xl font-semibold text-white">
+                    Dynamic CPU Overview
+                  </h2>
+                  <p className="text-sm text-neutral-400">
+                    Pulls user-space OS metrics from the host so you can compare observed load with the scheduler simulations.
+                  </p>
+                </div>
+              </div>
+              <SystemMetricsPanel />
             </motion.div>
           )}
         </AnimatePresence>
