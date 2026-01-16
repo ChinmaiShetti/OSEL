@@ -10,6 +10,7 @@ import {
   Zap,
   Info,
 } from 'lucide-react';
+import ConceptCard from '../ConceptCard';
 import { PagingEngine, PagingAlgorithms } from './PagingEngine';
 
 const algorithmMeta = {
@@ -24,6 +25,63 @@ const algorithmMeta = {
   [PagingAlgorithms.OPTIMAL]: {
     label: 'Optimal',
     description: 'Evict the page whose next reference is farthest away.',
+  },
+};
+
+const PAGING_CONCEPTS = {
+  [PagingAlgorithms.FIFO]: {
+    title: 'FIFO Replacement',
+    concept: 'Pages are evicted in the order they were loaded. When a fault occurs, the oldest resident page makes room for the new one.',
+    pros: [
+      'Ultra-simple queue-based implementation.',
+      'Easy to predict and reason about for teaching contexts.',
+      'Constant-time updates when a fault happens.',
+    ],
+    cons: [
+      'Belady\'s anomaly can make adding frames actually increase faults.',
+      'The oldest page might still be hot, so faults can spike.',
+      'Ignores actual usage patterns after loading.',
+    ],
+    example: 'Evict the customer who has been waiting the longest, even if they just sat down.',
+    realWorld: 'Legacy page managers and simple cache designs that favor predictability.',
+    complexity: 'Time: O(1) per fault with a circular queue, Space: O(frames)',
+    preemptive: false,
+  },
+  [PagingAlgorithms.LRU]: {
+    title: 'Least Recently Used (LRU)',
+    concept: 'Track the usage history and evict the page that has not been touched for the longest time, which assumes recent activity predicts future references.',
+    pros: [
+      'Captures temporal locality and adapts quickly to shifting workloads.',
+      'No Belady\'s anomaly - faults never increase when more frames are added.',
+      'Often nearly as good as optimal for real programs.',
+    ],
+    cons: [
+      'Needs timestamps or counters, increasing tracking overhead.',
+      'Updating access order on every reference can be expensive.',
+      'Hardware support is ideal; software implementations can be slow.',
+    ],
+    example: 'Freeze the browser tabs you never interacted with; evict the tab that hasn\'t been clicked in the longest time.',
+    realWorld: 'Modern caches and operating systems with reference bits or aging registers.',
+    complexity: 'Time: O(1) with hardware counters, Space: O(frames)',
+    preemptive: false,
+  },
+  [PagingAlgorithms.OPTIMAL]: {
+    title: 'Optimal Replacement',
+    concept: 'Evict the page whose next access is farthest in the future - perfect if you could see the future, making it a benchmark for other heuristics.',
+    pros: [
+      'Achieves the lowest possible page fault rate.',
+      'Useful as a theoretical gold standard for other algorithms.',
+      'Highlights workload patterns when used offline.',
+    ],
+    cons: [
+      'Requires perfect knowledge of future references - impossible in real time.',
+      'Used mainly in simulations and academic comparisons.',
+      'Hard to approximate without extra prediction logic.',
+    ],
+    example: 'Packing groceries when you know exactly when each item will be used later.',
+    realWorld: 'Offline simulations and research tools that evaluate replacement heuristics.',
+    complexity: 'Time: O(n²) if you scan the future queue each time, Space: O(frames)',
+    preemptive: false,
   },
 };
 
@@ -127,6 +185,7 @@ const PagingSimulator = ({ className = '' }) => {
   const [snapshot, setSnapshot] = useState(null);
   const [activeFrameInfo, setActiveFrameInfo] = useState(null);
   const [playing, setPlaying] = useState(false);
+  const [showConcept, setShowConcept] = useState(true);
 
   const timerRef = useRef(null);
 
@@ -271,6 +330,7 @@ const PagingSimulator = ({ className = '' }) => {
       return acc;
     }, {});
   const logs = snapshot?.logs ?? [];
+  const activePagingConcept = PAGING_CONCEPTS[algorithm] ?? PAGING_CONCEPTS[PagingAlgorithms.FIFO];
 
   const getFrameExplanation = (frame) => {
     if (frame.isFree) {
@@ -317,9 +377,16 @@ const PagingSimulator = ({ className = '' }) => {
       <div className="pointer-events-none absolute -top-24 left-0 h-80 w-80 rounded-full bg-cyan-500/20 blur-[160px]" />
       <div className="pointer-events-none absolute -bottom-10 right-10 h-64 w-64 rounded-full bg-fuchsia-500/25 blur-[140px]" />
 
-      <div className="glass relative overflow-hidden rounded-2xl border border-white/10 p-relaxed space-y-6">
-        <div className="pointer-events-none absolute -top-10 -right-6 h-32 w-32 rounded-full bg-slate-900/50 blur-[120px]" />
-        <div className="flex items-center gap-3">
+      <div className="relative space-y-6">
+        <ConceptCard
+          algorithm={algorithm}
+          concept={activePagingConcept}
+          isVisible={showConcept}
+          onToggle={() => setShowConcept(prev => !prev)}
+        />
+        <div className="glass relative overflow-hidden rounded-2xl border border-white/10 p-relaxed space-y-6">
+          <div className="pointer-events-none absolute -top-10 -right-6 h-32 w-32 rounded-full bg-slate-900/50 blur-[120px]" />
+          <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
             <ListOrdered className="w-5 h-5 text-white" />
           </div>
@@ -368,6 +435,7 @@ const PagingSimulator = ({ className = '' }) => {
           <StatusChip label="Page Faults" value={`${metrics.pageFaults}`} hint="Forced loads" />
           <StatusChip label="Fault Rate" value={`${metrics.pageFaultRate}%`} hint="Faults per reference" />
           <StatusChip label="Hits" value={`${metrics.pageHits}`} hint="Hits saved faults" />
+        </div>
         </div>
       </div>
 

@@ -8,10 +8,10 @@ import { ConceptCards } from './SchedulerEngine';
  * Displays educational information about the selected scheduling algorithm
  * Uses Framer Motion for smooth expand/collapse animations
  */
-const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
-  const concept = ConceptCards[algorithm];
-  
-  if (!concept) return null;
+const ConceptCard = ({ algorithm, concept: customConcept, isVisible, onToggle }) => {
+  const activeConcept = customConcept ?? ConceptCards[algorithm];
+
+  if (!activeConcept) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -43,7 +43,7 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
                     transition={{ delay: 0.15 }}
                     className="text-xl font-bold text-white"
                   >
-                    📚 {concept.title}
+                    📚 {activeConcept.title}
                   </motion.h2>
                   <motion.div 
                     initial={{ opacity: 0 }}
@@ -52,13 +52,13 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
                     className="flex items-center gap-2 mt-1"
                   >
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      concept.preemptive 
+                      activeConcept.preemptive 
                         ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
                         : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
                     }`}>
-                      {concept.preemptive ? '⚡ Preemptive' : '🔒 Non-Preemptive'}
+                      {activeConcept.preemptive ? '⚡ Preemptive' : '🔒 Non-Preemptive'}
                     </span>
-                    <span className="text-xs text-slate-400">{concept.complexity}</span>
+                    <span className="text-xs text-slate-400">{activeConcept.complexity}</span>
                   </motion.div>
                 </div>
               </div>
@@ -81,7 +81,7 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
             >
               <div className="flex items-start gap-3">
                 <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                <p className="text-slate-200 leading-relaxed">{concept.concept}</p>
+                <p className="text-slate-200 leading-relaxed">{activeConcept.concept}</p>
               </div>
             </motion.div>
 
@@ -99,7 +99,7 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
                   Strengths
                 </h3>
                 <ul className="space-y-2">
-                  {concept.pros.map((pro, i) => (
+                  {activeConcept.pros.map((pro, i) => (
                     <motion.li 
                       key={i}
                       initial={{ opacity: 0, x: -10 }}
@@ -126,7 +126,7 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
                   Weaknesses
                 </h3>
                 <ul className="space-y-2">
-                  {concept.cons.map((con, i) => (
+                  {activeConcept.cons.map((con, i) => (
                     <motion.li 
                       key={i}
                       initial={{ opacity: 0, x: 10 }}
@@ -152,18 +152,18 @@ const ConceptCard = ({ algorithm, isVisible, onToggle }) => {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-xs font-semibold text-blue-400 mb-1 uppercase tracking-wide">💡 Analogy</h4>
-                  <p className="text-sm text-slate-300">{concept.example}</p>
+                  <p className="text-sm text-slate-300">{activeConcept.example}</p>
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-purple-400 mb-1 uppercase tracking-wide">🌐 Real World Use</h4>
-                  <p className="text-sm text-slate-300">{concept.realWorld}</p>
+                  <p className="text-sm text-slate-300">{activeConcept.realWorld}</p>
                 </div>
               </div>
-              {concept.quantumNote && (
+              {activeConcept.quantumNote && (
                 <div className="mt-3 pt-3 border-t border-slate-600/30">
                   <p className="text-xs text-amber-300 flex items-center gap-2">
                     <Clock className="w-3 h-3" />
-                    {concept.quantumNote}
+                    {activeConcept.quantumNote}
                   </p>
                 </div>
               )}

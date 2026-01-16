@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, SkipForward, FastForward, RotateCcw, HardDrive, Zap } from 'lucide-react';
+import ConceptCard from '../ConceptCard';
 import { MemoryEngine, MemoryAlgorithms } from './MemoryEngine';
 
 const DEFAULT_HOLES = [100, 500, 200, 300];
@@ -17,6 +18,63 @@ const algorithmMeta = {
   [MemoryAlgorithms.WORST_FIT]: {
     label: 'Worst Fit',
     description: 'Pick the largest hole so large requests keep getting space.',
+  },
+};
+
+const STORAGE_CONCEPTS = {
+  [MemoryAlgorithms.FIRST_FIT]: {
+    title: 'First Fit Strategy',
+    concept: 'Scan memory from the beginning and drop a process into the first hole that is big enough, leaving the remainder available for later requests.',
+    pros: [
+      'Low search cost - the scan stops as soon as one suitable hole is found.',
+      'Straightforward to implement.',
+      'Stable for predictable workloads where requests arrive in steady order.',
+    ],
+    cons: [
+      'External fragmentation accumulates near the start of memory over time.',
+      'Later requests may have to scan many small holes before finding a fit.',
+      'Large jobs get pushed toward the end, which increases search time.',
+    ],
+    example: 'Placing a new folder into the first drawer with enough space, regardless of how the remaining drawers look.',
+    realWorld: 'Early OS loaders and embedded systems that value predictability over fragmentation control.',
+    complexity: 'Time: O(n), Space: O(1)',
+    preemptive: false,
+  },
+  [MemoryAlgorithms.BEST_FIT]: {
+    title: 'Best Fit Strategy',
+    concept: 'Inspect every free hole and settle for the smallest one that still fits the request to minimize wasted space.',
+    pros: [
+      'Tight matches shrink wasted space between allocations.',
+      'Slows the growth of useless tiny fragments.',
+      'Works well for systems with lots of small, predictable requests.',
+    ],
+    cons: [
+      'Requires examining the whole hole list, so allocation becomes slower as fragmentation rises.',
+      'Creates tiny unusable gaps that are difficult to reuse.',
+      'Needs good bookkeeping to keep holes sorted by size.',
+    ],
+    example: 'Packing luggage into the smallest nook that fits so the rest of the suitcase stays available.',
+    realWorld: 'Databases or custom allocators that aggressively minimize external fragmentation.',
+    complexity: 'Time: O(n log n) if the hole list stays sorted, Space: O(n)',
+    preemptive: false,
+  },
+  [MemoryAlgorithms.WORST_FIT]: {
+    title: 'Worst Fit Strategy',
+    concept: 'Always pick the largest available hole so the remaining space stays large enough to satisfy future big requests.',
+    pros: [
+      'Keeps a few large holes open for sizable jobs.',
+      'Avoids chipping away at the biggest regions too fast.',
+      'Easy to reason about - allocate the biggest chunk.',
+    ],
+    cons: [
+      'Wastes large holes on small requests, blocking big jobs for nothing.',
+      'Large holes still fragment over time if sliced repeatedly.',
+      'Inefficient when most allocations are lightweight.',
+    ],
+    example: 'Parking a compact car in the biggest bay so the rest of the garage remains flexible.',
+    realWorld: 'Systems dominated by giant sequential jobs that benefit from reserved room.',
+    complexity: 'Time: O(n), Space: O(1)',
+    preemptive: false,
   },
 };
 
@@ -112,6 +170,7 @@ const MemorySimulator = ({ className = '' }) => {
   const [snapshot, setSnapshot] = useState(null);
   const [results, setResults] = useState(null);
   const [playing, setPlaying] = useState(false);
+  const [showConcept, setShowConcept] = useState(true);
 
   const timerRef = useRef(null);
 
@@ -224,6 +283,7 @@ const MemorySimulator = ({ className = '' }) => {
   };
 
   const currentRequest = snapshot?.currentRequest;
+  const activeStorageConcept = STORAGE_CONCEPTS[algorithm] ?? STORAGE_CONCEPTS[MemoryAlgorithms.FIRST_FIT];
   const metrics = snapshot?.metrics ?? {
     totalMemory: totalHoleSpace,
     allocated: 0,
@@ -242,6 +302,12 @@ const MemorySimulator = ({ className = '' }) => {
       <div className="pointer-events-none absolute -top-24 left-0 h-80 w-80 rounded-full bg-fuchsia-500/20 blur-[160px]" />
       <div className="pointer-events-none absolute -bottom-10 right-10 h-64 w-64 rounded-full bg-cyan-500/25 blur-[140px]" />
       <div className="relative space-y-6">
+        <ConceptCard
+          algorithm={algorithm}
+          concept={activeStorageConcept}
+          isVisible={showConcept}
+          onToggle={() => setShowConcept(prev => !prev)}
+        />
         <div className="glass relative overflow-hidden rounded-2xl border border-white/10 p-relaxed space-y-6">
           <div className="pointer-events-none absolute -top-10 -right-6 h-32 w-32 rounded-full bg-cyan-500/30 blur-[120px]" />
           <div className="flex flex-col gap-2">
