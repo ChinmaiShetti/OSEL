@@ -14,6 +14,7 @@ import MetricsExplainer from './MetricsExplainer';
 import TraceViewer from './TraceViewer';
 import GanttChart from './GanttChart';
 import MemorySimulator from './memory/MemorySimulator';
+import PagingSimulator from './memory/PagingSimulator';
 
 // Import engine
 import { 
@@ -189,6 +190,7 @@ const CPUSimulator = () => {
   const pageOptions = [
     { id: 'scheduling', label: 'Scheduling' },
     { id: 'storage', label: 'Storage Allocation' },
+    { id: 'paging', label: 'Paging Explorer' },
   ];
 
   return (
@@ -470,6 +472,38 @@ const CPUSimulator = () => {
                 </div>
               </div>
               <MemorySimulator className="pt-2" />
+            </motion.div>
+          )}
+
+          {activePage === 'paging' && (
+            <motion.div
+              key="paging"
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8"
+            >
+              <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(99,102,241,0.8)]">
+                <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-cyan-500/20 blur-[120px]" />
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs uppercase tracking-[0.4em] text-emerald-300">Paging Lab</p>
+                  <h2 className="text-3xl font-semibold text-white">
+                    Replacement Policy Studio
+                  </h2>
+                  <p className="text-sm text-neutral-400">
+                    Visualize FIFO, LRU, and Optimal page replacement across fixed-size frames while tracking faults and hits.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.4em] text-white">Live</div>
+                    <div className="flex items-center gap-1 text-sm text-neutral-300">
+                      <ListOrdered className="w-4 h-4 text-indigo-300" />
+                      Frame-by-frame insight
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <PagingSimulator className="pt-2" />
             </motion.div>
           )}
         </AnimatePresence>
