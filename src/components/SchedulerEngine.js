@@ -524,6 +524,49 @@ export const ConceptCards = {
     preemptive: true,
     quantumNote: 'Typical quantum: 10-100ms in real systems'
   },
+  // Cache Replacement Algorithms
+  FIFO: {
+    title: 'FIFO Cache Replacement',
+    shortName: 'FIFO Cache',
+    concept: 'A queue-like cache drops the earliest loaded block when space runs out so the oldest arrival always makes room for the next request.',
+    pros: [
+      'Simple bookkeeping via arrival order',
+      'Deterministic eviction makes demonstrations predictable',
+      'Great for teaching the difference between load order and usage order',
+      'Minimal overhead with O(1) operations'
+    ],
+    cons: [
+      'Evicts regardless of future demand, so a hot item may still be bounced',
+      'Can suffer Belady-style anomalies if bursty accesses loop over a small set',
+      'Does not honor the fact that recent accesses are likely to be needed again',
+      'Ignores temporal locality principle'
+    ],
+    example: 'Like letting the earliest guest leave when the waiting room is full.',
+    realWorld: 'Legacy embedded caches and simple buffering layers where tracking recency is expensive.',
+    complexity: 'Time: O(1) per access, Space: O(cacheSlots)',
+    preemptive: false,
+  },
+  LRU: {
+    title: 'LRU (Least Recently Used)',
+    shortName: 'LRU Cache',
+    concept: 'Tracks usage history and evicts the block that was idle the longest because old usage hints at future coldness.',
+    pros: [
+      'Adapts to temporal locality, a key cache principle',
+      'Avoids evicting items that are frequently revisited',
+      'Matches what modern page tables and CPU caches approximate with recency bits',
+      'Generally better hit rates than FIFO for typical workloads'
+    ],
+    cons: [
+      'Needs timestamps or counters to track every reference',
+      'Write-heavy workloads can make updates costly without hardware help',
+      'Still can miss patterns when bursts of new data arrive faster than reuse',
+      'More complex implementation than FIFO'
+    ],
+    example: 'Evicting the book you last opened least recently when your hands are full.',
+    realWorld: 'CPU cache lines, web caches, and database buffers often emulate LRU with aging registers.',
+    complexity: 'Time: O(1) with hardware counters, Space: O(cacheSlots)',
+    preemptive: false,
+  },
 };
 
 // Metrics explanations for educational display
