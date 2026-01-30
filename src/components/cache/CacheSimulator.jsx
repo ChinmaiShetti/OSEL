@@ -226,7 +226,7 @@ const CacheSimulator = ({ className = '' }) => {
       <div className="pointer-events-none absolute -bottom-10 right-10 h-64 w-64 rounded-full bg-cyan-500/25 blur-[140px]" />
 
       <div className="relative space-y-6">
-        <ConceptCard 
+        <ConceptCard
           algorithm={algorithm}
           concept={activeConcept}
           isVisible={showConcept}
@@ -302,11 +302,10 @@ const CacheSimulator = ({ className = '' }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setAlgorithm(algo)}
                 disabled={playing}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold transition-all border ${
-                  algorithm === algo
+                className={`rounded-2xl px-4 py-3 text-sm font-semibold transition-all border ${algorithm === algo
                     ? 'bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-400 text-white border-transparent shadow-[0_20px_45px_rgba(123,66,255,0.5)]'
                     : 'bg-slate-900/40 text-slate-200 border-white/10 hover:border-white/30'
-                }`}
+                  }`}
               >
                 {algo}
               </motion.button>
