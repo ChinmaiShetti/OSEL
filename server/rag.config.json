@@ -1,0 +1,19 @@
+{
+  "pdfPath": "ragreference.pdf",
+  "extraFiles": [
+    "README.md",
+    "src/components/CPUSimulator.jsx",
+    "src/components/SchedulerEngine.js",
+    "src/components/memory/MemoryEngine.js",
+    "src/components/memory/PagingEngine.js",
+    "src/components/cache/CacheEngine.js",
+    "src/utils/systemMetrics.js"
+  ],
+  "chunk": {
+    "maxChars": 900,
+    "overlapChars": 120
+  },
+  "retrieval": {
+    "topK": 4
+  }
+}

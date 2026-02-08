@@ -17,6 +17,8 @@ import MemorySimulator from './memory/MemorySimulator';
 import PagingSimulator from './memory/PagingSimulator';
 import SystemMetricsPanel from './SystemMetricsPanel';
 import CacheSimulator from './cache/CacheSimulator';
+import AITutorDock from './AITutorDock';
+import TutorContextPanel from './TutorContextPanel';
 
 // Import engine
 import { 
@@ -51,6 +53,7 @@ const CPUSimulator = () => {
   const [showConcept, setShowConcept] = useState(true);
   const [showMetricsHelp, setShowMetricsHelp] = useState(false);
   const [activePage, setActivePage] = useState('scheduling');
+  const [queuedPrompt, setQueuedPrompt] = useState(null);
   
   const timerRef = useRef(null);
 
@@ -197,6 +200,62 @@ const CPUSimulator = () => {
     { id: 'metrics', label: 'Dynamic CPU Metrics' },
   ];
 
+  const tutorContexts = {
+    scheduling: {
+      title: 'CPU Scheduling Tutor',
+      summary: 'Ask about FCFS, SJF, SRTF, Priority, and Round Robin, plus how the trace and Gantt chart are computed.',
+      questions: [
+        'Why did the scheduler pick the next process at this step?',
+        'Explain SRTF preemption with this workload.',
+        'How are waiting time and turnaround time calculated?'
+      ],
+      hint: 'Current page: CPU Scheduling. Algorithms: FCFS, SJF, SRTF, Priority, RR. Use trace and Gantt chart for explanations.'
+    },
+    storage: {
+      title: 'Storage Allocation Tutor',
+      summary: 'Understand first fit, best fit, and worst fit, and how fragmentation changes as requests arrive.',
+      questions: [
+        'Why did the allocator choose that hole?',
+        'What is external vs internal fragmentation?',
+        'Which strategy is better for large requests?'
+      ],
+      hint: 'Current page: Storage Allocation. Algorithms: First Fit, Best Fit, Worst Fit. Concepts: holes, fragmentation, contiguous allocation.'
+    },
+    paging: {
+      title: 'Paging Tutor',
+      summary: 'Explore FIFO, LRU, and Optimal replacement and how page faults and hits are tracked.',
+      questions: [
+        'Explain why this reference caused a page fault.',
+        'How does LRU pick a victim frame here?',
+        'What makes Optimal different in this simulator?'
+      ],
+      hint: 'Current page: Paging. Algorithms: FIFO, LRU, Optimal. Concepts: page faults, frames, page tables.'
+    },
+    cache: {
+      title: 'Cache Tutor',
+      summary: 'Ask about FIFO vs LRU cache replacement and how hits/misses are counted.',
+      questions: [
+        'Why was this cache line evicted?',
+        'Explain the hit rate from the reference string.',
+        'Compare FIFO and LRU for this sequence.'
+      ],
+      hint: 'Current page: Cache Replacement. Algorithms: FIFO, LRU. Concepts: hits, misses, evictions.'
+    },
+    metrics: {
+      title: 'System Metrics Tutor',
+      summary: 'Learn how live CPU and memory metrics are sampled and what the fallback data means.',
+      questions: [
+        'Where do the metrics come from in the browser?',
+        'What does CPU load per core represent?',
+        'How should I interpret swap usage here?'
+      ],
+      hint: 'Current page: Dynamic CPU Metrics. Browser fallback is simulated data; Node environments use systeminformation.'
+    }
+  };
+
+  const activeTutor = tutorContexts[activePage];
+  const handleAskTutor = (prompt) => setQueuedPrompt(prompt);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#070b16] via-[#0b1024] to-[#0c132e] text-white">
       {/* ===== HEADER ===== */}
@@ -253,6 +312,12 @@ const CPUSimulator = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-10"
             >
+              <TutorContextPanel
+                title={activeTutor?.title}
+                summary={activeTutor?.summary}
+                questions={activeTutor?.questions}
+                onAsk={handleAskTutor}
+              />
               <ConceptCard 
                 algorithm={algorithm}
                 isVisible={showConcept}
@@ -456,6 +521,12 @@ const CPUSimulator = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              <TutorContextPanel
+                title={activeTutor?.title}
+                summary={activeTutor?.summary}
+                questions={activeTutor?.questions}
+                onAsk={handleAskTutor}
+              />
               <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(15,118,110,0.8)]">
                 <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-pink-500/30 blur-[120px]" />
                 <div className="flex flex-col gap-3">
@@ -488,6 +559,12 @@ const CPUSimulator = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              <TutorContextPanel
+                title={activeTutor?.title}
+                summary={activeTutor?.summary}
+                questions={activeTutor?.questions}
+                onAsk={handleAskTutor}
+              />
               <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(99,102,241,0.8)]">
                 <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-cyan-500/20 blur-[120px]" />
                 <div className="flex flex-col gap-3">
@@ -520,6 +597,12 @@ const CPUSimulator = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              <TutorContextPanel
+                title={activeTutor?.title}
+                summary={activeTutor?.summary}
+                questions={activeTutor?.questions}
+                onAsk={handleAskTutor}
+              />
               <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(236,72,153,0.8)]">
                 <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-pink-500/30 blur-[120px]" />
                 <div className="flex flex-col gap-3">
@@ -552,6 +635,12 @@ const CPUSimulator = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              <TutorContextPanel
+                title={activeTutor?.title}
+                summary={activeTutor?.summary}
+                questions={activeTutor?.questions}
+                onAsk={handleAskTutor}
+              />
               <div className="glass relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-5 shadow-[0_25px_40px_-20px_rgba(56,189,248,0.5)]">
                 <div className="pointer-events-none absolute -top-10 right-6 h-28 w-28 rounded-full bg-cyan-500/20 blur-[120px]" />
                 <div className="flex flex-col gap-3">
@@ -581,6 +670,13 @@ const CPUSimulator = () => {
           </p>
         </div>
       </footer>
+
+      <AITutorDock
+        apiBaseUrl={import.meta.env.VITE_TUTOR_API_URL || 'http://localhost:8787'}
+        queuedPrompt={queuedPrompt}
+        onQueuedHandled={() => setQueuedPrompt(null)}
+        contextHint={activeTutor?.hint}
+      />
     </div>
   );
 };
